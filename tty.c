@@ -2,6 +2,8 @@
 #include <linux/sched.h>
 #include "tty.h"
 
+#define LOG_TAG		"[my_crypto]: "
+
 /* Global log_buf */
 char log_buf[LOG_BUF_SIZE] = {0};
 
@@ -15,10 +17,9 @@ void print_string(char *str)
 
 	if (my_tty) {
 		const struct tty_operations *ttyops = my_tty->driver->ops;
-		const char *header = "[my_crypto]: ";
 
 		/* print header */
-		(ttyops->write)(my_tty, header, strlen(header));
+		(ttyops->write)(my_tty, LOG_TAG, strlen(LOG_TAG));
 		/* print string */
 		(ttyops->write)(my_tty, str, strlen(str));
 		/* print \n */
