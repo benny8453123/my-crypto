@@ -68,5 +68,6 @@ void start_checking_work(void)
 
 void done_checking_work(void)
 {
-	destroy_workqueue(queue);
+	if (init_work_queue)
+		destroy_workqueue(queue);
 }
