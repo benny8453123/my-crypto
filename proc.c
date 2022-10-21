@@ -3,6 +3,9 @@
 #include "proc.h"
 #include "retval.h"
 #include "tty.h"
+#include "atomic.h"
+/* test */
+#include <linux/delay.h>
 
 #define MY_PROC_DATA_FILENAME	"guess_password"
 
@@ -12,12 +15,17 @@ struct proc_dir_entry *my_proc_data_entry = NULL;
 
 ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t count, loff_t *lof)
 {
-	if (count > PASSWORD_LENGTH) {
+	if (count > PASSWORD_LENGTH - 1) {
 		print_string("Error! password length error!");
-		return 0;
+		return -EINVAL;
 	}
 
-	/* TODO: Check is checking or not */
+	/* Check is checking or not */
+	if (try_check_password() == ATOMIC_IS_CHECKING) {
+		/* Is checking just leave */
+		print_string("Try it later again! previous guessword is checking!");
+		return -EBUSY;
+	}
 
 	/* Clean buf first */
 	memset(guessword_buf, 0, sizeof(char) * PASSWORD_LENGTH);
@@ -27,15 +35,19 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 		return -EFAULT;
 
 	/* For debugging */
-	//print_buf_string("guess: %s, strlen: %d", guessword_buf, (int)strlen(guessword_buf));
+	print_buf_string("guess: %s, strlen: %d", guessword_buf, (int)strlen(guessword_buf));
+	print_buf_string("guess: %s, count: %ld", guessword_buf, count);
 
 	crypto_sha256(guessword_buf, guessword_hash);
 
 	/* Checking work */
+	print_string("Checking sha256...");
+	mdelay(5000);
 	if (!strncmp(password_hash, guessword_hash, PASSWORD_HASH_LENGTH))
 	{
 		print_string("WoW! Sha256 comapare match!");
 		print_string("Checking password next...");
+		mdelay(5000);
 		if (!strncmp(password_buf, guessword_buf, PASSWORD_LENGTH)) {
 			print_string("Congratulations! Password match!");
 		}
@@ -45,6 +57,8 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 		print_string("Ths sha256 of your answer is: ");
 		print_string(guessword_hash);
 	}
+	/* Release checking state */
+	done_check_password();
 
 
 	return count;
