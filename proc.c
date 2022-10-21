@@ -35,8 +35,7 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 		return -EFAULT;
 
 	/* For debugging */
-	print_buf_string("guess: %s, strlen: %d", guessword_buf, (int)strlen(guessword_buf));
-	print_buf_string("guess: %s, count: %ld", guessword_buf, count);
+	//print_buf_string("guess: %s, strlen: %d", guessword_buf, (int)strlen(guessword_buf));
 
 	crypto_sha256(guessword_buf, guessword_hash);
 
