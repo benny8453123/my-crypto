@@ -1,11 +1,24 @@
 #include <linux/tty.h>
 #include <linux/sched.h>
+#include <linux/delay.h>
 #include "tty.h"
 
-#define LOG_TAG		"[my_crypto]: "
+#define LOG_TAG				"[my_crypto]: "
+#define DOT_PRINT_TIMES		4
+#define DOT_DELAY_TIME		1000
 
 /* Global log_buf */
 char log_buf[LOG_BUF_SIZE] = {0};
+
+void print_dot(void)
+{
+	int i;
+
+	for (i = 0; i< DOT_PRINT_TIMES; ++i) {
+		mdelay(DOT_DELAY_TIME);
+		print_string(".");
+	}
+}
 
 void print_string(char *str)
 {

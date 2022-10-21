@@ -7,7 +7,7 @@
 #include "sha256.h"
 
 /* function prototype declaration */
-/* create & remove proc entry */
+/* create and remove proc entry */
 int create_my_proc_data_entry(void);
 void remove_my_proc_data_entry(void);
 

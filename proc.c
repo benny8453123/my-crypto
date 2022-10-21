@@ -2,12 +2,18 @@
 #include <linux/proc_fs.h>
 #include "proc.h"
 #include "retval.h"
-/* For using print_string() & print_buf_string() */
+/* For using print_string() and print_buf_string() */
 #include "tty.h"
-/* For using try_check_password() */
+/* For using try_check_password(), init_match(),
+ * get_hash_match(), get_buf_match() and ATOMIC_IS_MATCH macro
+ */
 #include "atomic.h"
-/* For using start_checking_work() & done_checking_work() */
+/* For using start_checking_work() and done_checking_work() */
 #include "workqueue.h"
+/* For using init_check_completion(), wait_buf_check_completion()
+ * and wait_hash_check_completion()
+ */
+#include "completion.h"
 
 #define MY_PROC_DATA_FILENAME	"guess_password"
 
@@ -29,9 +35,15 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 		return -EBUSY;
 	}
 
-	/* Clean buf first */
+	/* Init state:
+	 * 	1. Clean buf
+	 * 	2. Reset result-atomic of buf and hash
+	 * 	3. Reset checking-completion of buf and hash
+	 */
 	memset(guessword_buf, 0, sizeof(char) * PASSWORD_LENGTH);
 	memset(guessword_hash, 0, sizeof(char) * PASSWORD_HASH_LENGTH);
+	init_match();
+	init_check_completion();
 
 	if (copy_from_user(guessword_buf, buf, count))
 		return -EFAULT;
@@ -42,7 +54,34 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 	crypto_sha256(guessword_buf, guessword_hash);
 
 	/* Start checking workqueue */
-	start_checking_work();
+	start_hash_checking_work();
+	start_buf_checking_work();
+
+	/* Wait for both checking completion */
+	wait_buf_check_completion();
+	wait_hash_check_completion();
+
+	/* Print result */
+	print_string("Checking sha256...");
+	print_dot();
+	if (get_hash_match() == ATOMIC_IS_MATCH) {
+		print_string("WoW! Sha256 comapare match! Checking password next...");
+		print_dot();
+
+		if(get_buf_match() == ATOMIC_IS_MATCH)
+			print_string("Congratulations! Password match!");
+		else {
+			print_string("Oh no! Password not match!");
+			print_string("This is such a rare sitiuation.");
+		}
+	} else {
+		print_string("Sorry! Sha256 comapare not match!");
+		print_string("Ths sha256 of your answer is: ");
+		print_string(guessword_hash);
+	}
+
+	/* Release checking state atomic */
+	done_check_password();
 
 	return count;
 }

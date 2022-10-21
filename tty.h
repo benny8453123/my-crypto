@@ -23,6 +23,7 @@
 
 /* function prototype declaration */
 void print_string(char *str);
+void print_dot(void);
 
 /* global variable extern */
 extern char log_buf[LOG_BUF_SIZE];;
