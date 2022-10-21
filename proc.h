@@ -1,6 +1,9 @@
 #ifndef PROC_H
 #define PROC_H
+
+/* For using PASSWORD_LENGTH macro */
 #include "my-crypto.h"
+/* For using PASSWORD_HASH_LENGTH macro */
 #include "sha256.h"
 
 /* function prototype declaration */

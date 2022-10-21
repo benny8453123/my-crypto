@@ -2,10 +2,12 @@
 #include <linux/proc_fs.h>
 #include "proc.h"
 #include "retval.h"
+/* For using print_string() & print_buf_string() */
 #include "tty.h"
+/* For using try_check_password() */
 #include "atomic.h"
-/* test */
-#include <linux/delay.h>
+/* For using start_checking_work() & done_checking_work() */
+#include "workqueue.h"
 
 #define MY_PROC_DATA_FILENAME	"guess_password"
 
@@ -39,26 +41,8 @@ ssize_t my_proc_data_write(struct file *file, const char __user *buf, size_t cou
 
 	crypto_sha256(guessword_buf, guessword_hash);
 
-	/* Checking work */
-	print_string("Checking sha256...");
-	mdelay(5000);
-	if (!strncmp(password_hash, guessword_hash, PASSWORD_HASH_LENGTH))
-	{
-		print_string("WoW! Sha256 comapare match!");
-		print_string("Checking password next...");
-		mdelay(5000);
-		if (!strncmp(password_buf, guessword_buf, PASSWORD_LENGTH)) {
-			print_string("Congratulations! Password match!");
-		}
-
-	} else {
-		print_string("Sorry! Sha256 comapare not match!");
-		print_string("Ths sha256 of your answer is: ");
-		print_string(guessword_hash);
-	}
-	/* Release checking state */
-	done_check_password();
-
+	/* Start checking workqueue */
+	start_checking_work();
 
 	return count;
 }
@@ -105,6 +89,10 @@ out:
 
 void remove_my_proc_data_entry(void)
 {
+	/* Release resource of workqueue */
+	done_checking_work();
+
+	/* Release proc entry resource */
 	remove_proc_entry(MY_PROC_DATA_FILENAME, NULL);
 
 	return;

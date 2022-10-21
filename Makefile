@@ -1,7 +1,7 @@
 CONFIG_MODULE_SIG=n
 
 obj-m                           += encrypt-test-module.o
-encrypt-test-module-objs        := my-crypto.o tty.o sha256.o proc.o atomic.o
+encrypt-test-module-objs        := my-crypto.o tty.o sha256.o proc.o atomic.o workqueue.o
 
 #CC=gcc
 KVERSION = $(shell uname -r)

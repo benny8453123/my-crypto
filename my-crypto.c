@@ -3,10 +3,12 @@
 #include <linux/moduleparam.h>
 #include "my-crypto.h"
 #include "retval.h"
+/* For using print_string() & print_buf_string() */
 #include "tty.h"
+/* For using create_my_proc_data_entry() & remove_my_proc_data_entry() */
 #include "proc.h"
+/* For using crypto_sha256() & PASSWORD_HASH_LENGTH macro */
 #include "sha256.h"
-#include "proc.h"
 
 /* Global password hash */
 char password_buf[PASSWORD_LENGTH] = {0};

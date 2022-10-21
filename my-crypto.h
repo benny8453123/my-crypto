@@ -1,6 +1,7 @@
 #ifndef MY_CRYPTO_H
 #define MY_CRYPTO_H
 
+/* For using PASSWORD_HASH_LENGTH macro */
 #include "sha256.h"
 
 /* macro definition*/
